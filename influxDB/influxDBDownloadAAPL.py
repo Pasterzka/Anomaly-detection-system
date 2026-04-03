@@ -1,7 +1,7 @@
 import influxdb_client
 import yfinance as yf
 import sys
-import connectInfluxDB
+import influxDB.influxDBConnection as influxDBConnection
 
 
 bucket="STOCK-db1"
@@ -9,7 +9,7 @@ org="PG"
 
 if __name__ == "__main__":
     # connect to influxDB
-    client, writeAPI, queryApi = connectInfluxDB.connectInfluxDB()
+    client, writeAPI, queryApi = influxDBConnection.connectToInfluxDB()
 
     # download data
     stock = "AAPL"

@@ -14,7 +14,7 @@ org = "PG"
 
 
 
-def connectInfluxDB():
+def connectToInfluxDB():
     client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
     writeAPI = client.write_api(write_options=SYNCHRONOUS)
     queryApi = client.query_api()
