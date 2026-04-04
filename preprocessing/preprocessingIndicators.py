@@ -4,18 +4,18 @@ import numpy as np
 
 def preprocessingIndicators(dataFrame):
 
-    print("[INFO] Starting indicators preprocessing...")
+    print("[INFO] Starting indicators preprocessing...\n\n")
     window = 14
 
     print("[INFO] Calculating SMA...")
     sma = calculateSMA(dataFrame, window)
     dataFrame['SMA14'] = sma
-    print("[SUCCESS] SMA calculation completed.")
+    print("[SUCCESS] SMA calculation completed.\n")
 
     print("[INFO] Calculating EMA...")
     ema = calculateEMA(dataFrame, window)
     dataFrame['EMA14'] = ema
-    print("[SUCCESS] EMA calculation completed.")
+    print("[SUCCESS] EMA calculation completed.\n")
 
     print("[INFO] Calculating WMA...")
     wma = calcualteWMA(dataFrame, window)
@@ -25,7 +25,17 @@ def preprocessingIndicators(dataFrame):
     print("[INFO] Calculating ATR...")
     atr = calculateATR(dataFrame, window)
     dataFrame['ATR14'] = atr
-    print("[SUCCESS] ATR calculation completed.")
+    print("[SUCCESS] ATR calculation completed.\n")
+
+    print("[INFO] Calculating ROC...")
+    roc = calculateROC(dataFrame, window)
+    dataFrame['ROC14'] = roc
+    print("[SUCCESS] ROC calculation completed.\n")
+
+    print("[INFO] Calculating MACD...")
+    macd = calculateMACD(dataFrame, window)
+    dataFrame['MACD'] = macd
+    print("[SUCCESS] MACD calculation completed.\n")
 
 
     return dataFrame
@@ -49,7 +59,11 @@ def calculateEMA(dataFrame, window):
     close = dataFrame['close'].values
 
     # Initialize the first EMA value with the corresponding SMA value
-    ema[window - 1] = dataFrame['SMA14'].values[window - 1]
+    #ema[window - 1] = dataFrame['SMA14'].values[window - 1]
+    sum = 0
+    for j in range(0, window):
+            sum += close[j]
+    ema[window - 1] = sum / window
 
     alpha = 2 / (window + 1)
     for i in range(window, len(dataFrame)):
@@ -63,7 +77,6 @@ def calcualteWMA(dataFrame, window):
     close = dataFrame['close'].values
 
     weights = np.arange(1, window + 1)
-    print(weights)
     weightsSum = np.sum(weights)
 
     for i in range(window - 1, len(dataFrame)):
@@ -98,3 +111,22 @@ def calculateATR(dataFrame, window):
         atr[i] = sumTR / window
 
     return atr
+
+# window Rate of Change (ROC)
+def calculateROC(dataFrame, window):
+    roc = np.full(len(dataFrame), np.nan)
+    close = dataFrame['close'].values
+
+    for i in range(window, len(dataFrame)):
+        roc[i] = ((close[i] - close[i - window]) / close[i - window]) * 100
+
+    return roc
+
+# window Moving Average Convergence Divergence (MACD)
+def calculateMACD(dataFrame, window):
+    emaFast = calculateEMA(dataFrame, 12)
+    emaSlow = calculateEMA(dataFrame, 26)
+    print(emaFast)    
+    print(emaSlow)
+    macd = emaFast - emaSlow
+    return macd
