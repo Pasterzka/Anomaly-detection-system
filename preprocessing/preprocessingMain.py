@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from influxDB import influxDBConnection
 from preprocessingQuery import preprocessingQuery
 from preprocessingInterpolation import preprocessingInterpolation
+from preprocessingIndicators import preprocessingIndicators
 
 
 stock = "AAPL"
@@ -19,11 +20,14 @@ if __name__ == "__main__":
     client, writeAPI, queryApi = influxDBConnection.connectToInfluxDB()
     dataFrame = preprocessingQuery(queryApi, stock)
 
-    print(dataFrame.head(10))
+    #print(dataFrame.head(10))
     # interpolation
     dataFrame = preprocessingInterpolation(dataFrame)
 
     print("[SUCCESS] Interpolation ended.")
-    print(dataFrame.head(10))
+    #print(dataFrame.head(10))
+
+    dataFrame = preprocessingIndicators(dataFrame)
+    print(dataFrame.head(50))
 
 
