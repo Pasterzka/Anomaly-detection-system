@@ -37,6 +37,16 @@ def preprocessingIndicators(dataFrame):
     dataFrame['MACD'] = macd
     print("[SUCCESS] MACD calculation completed.\n")
 
+    print("[INFO] Calculating RSI...")
+    rsi = calucalateRSI(dataFrame, window)
+    dataFrame['RSI14'] = rsi
+    print("[SUCCESS] RSI calculation completed.\n")
+
+    print("[INFO] Calculating OBV...")
+    obv = calculateOBV(dataFrame)
+    dataFrame['OBV'] = obv
+    print("[SUCCESS] OBV calculation completed.\n")
+
 
     return dataFrame
 
@@ -130,3 +140,54 @@ def calculateMACD(dataFrame, window):
     print(emaSlow)
     macd = emaFast - emaSlow
     return macd
+
+# window Relative Strength Index (RSI)
+def calucalateRSI(dataFrame, window):
+    rsi = np.full(len(dataFrame), np.nan)
+    close = dataFrame['close'].values
+
+    gains = np.zeros(len(dataFrame))
+    losses = np.zeros(len(dataFrame))
+
+    for i in range(1, len(dataFrame)):
+        change = close[i] - close[i - 1]
+        if change > 0:
+            gains[i] = change
+        else:
+            losses[i] = -change
+
+    avgGain = np.full(len(dataFrame), np.nan)
+    avgLoss = np.full(len(dataFrame), np.nan)
+
+    avgGain[window] = np.mean(gains[1:window + 1])
+    avgLoss[window] = np.mean(losses[1:window + 1])
+
+    for i in range(window + 1, len(dataFrame)):
+        avgGain[i] = (avgGain[i - 1] * (window - 1) + gains[i]) / window
+        avgLoss[i] = (avgLoss[i - 1] * (window - 1) + losses[i]) / window
+
+    for i in range(window, len(dataFrame)):
+        if avgLoss[i] == 0:
+            rsi[i] = 100
+        else:
+            rs = avgGain[i] / avgLoss[i]
+            rsi[i] = 100 - (100 / (1 + rs))
+
+    return rsi
+
+# window On-Balance Volume (OBV)
+def calculateOBV(dataFrame):
+    obv = np.full(len(dataFrame), np.nan)
+    close = dataFrame['close'].values
+    volume = dataFrame['volume'].values
+
+    obv[0] = 0
+    for i in range(1, len(dataFrame)):
+        if close[i] > close[i - 1]:
+            obv[i] = obv[i - 1] + volume[i]
+        elif close[i] < close[i - 1]:
+            obv[i] = obv[i - 1] - volume[i]
+        else:
+            obv[i] = obv[i - 1]
+
+    return obv

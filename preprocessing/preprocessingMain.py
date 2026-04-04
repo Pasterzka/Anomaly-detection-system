@@ -38,7 +38,11 @@ if __name__ == "__main__":
     plt.plot(dataFrame['ATR14'], label='ATR14')
     plt.plot(dataFrame['ROC14'], label='ROC14')
     plt.plot(dataFrame['MACD'], label='MACD')
+    plt.plot(dataFrame['RSI14'], label='RSI14')
+    plt.plot(dataFrame['OBV'], label='OBV')
 
+    
+    plt.ylim(-5, 1000)
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.title('Stock Price with Indicators')
