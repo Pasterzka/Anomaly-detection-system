@@ -35,6 +35,7 @@ if __name__ == "__main__":
     plt.plot(dataFrame['SMA14'], label='SMA14')
     plt.plot(dataFrame['EMA14'], label='EMA14')
     plt.plot(dataFrame['WMA14'], label='WMA14')
+    plt.plot(dataFrame['ATR14'], label='ATR14')
 
     plt.xlabel('Date')
     plt.ylabel('Price')

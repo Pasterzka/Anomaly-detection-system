@@ -22,6 +22,11 @@ def preprocessingIndicators(dataFrame):
     dataFrame['WMA14'] = wma
     print("[SUCCESS] WMA calculation completed.")
 
+    print("[INFO] Calculating ATR...")
+    atr = calculateATR(dataFrame, window)
+    dataFrame['ATR14'] = atr
+    print("[SUCCESS] ATR calculation completed.")
+
 
     return dataFrame
 
@@ -31,10 +36,10 @@ def calculateSMA(dataFrame, window):
     close = dataFrame['close'].values
 
     for i in range(window - 1, len(dataFrame)):
-        suma = 0
+        sum = 0
         for j in range(i - window + 1, i + 1):
-            suma += close[j]
-        sma[i] = suma / window
+            sum += close[j]
+        sma[i] = sum / window
 
     return sma
 
@@ -52,6 +57,7 @@ def calculateEMA(dataFrame, window):
 
     return ema
 
+# window Weighted Moving Average (WMA)
 def calcualteWMA(dataFrame, window):
     wma = np.full(len(dataFrame), np.nan)
     close = dataFrame['close'].values
@@ -61,8 +67,34 @@ def calcualteWMA(dataFrame, window):
     weightsSum = np.sum(weights)
 
     for i in range(window - 1, len(dataFrame)):
-        suma = 0
+        sum = 0
         for j in range(i - window + 1, i + 1):
-            suma += close[j] * weights[j - (i - window + 1)]
-        wma[i] = suma / weightsSum
+            sum += close[j] * weights[j - (i - window + 1)]
+        wma[i] = sum / weightsSum
     return wma
+
+# day True Range (TR)
+def calculateTR(dataFrame):
+    tr = np.full(len(dataFrame), np.nan)
+    high = dataFrame['high'].values
+    low = dataFrame['low'].values
+    close = dataFrame['close'].values
+
+    tr[0] = high[0] - low[0]
+    for i in range(1, len(dataFrame)):
+        tr[i] = max(high[i] - low[i], abs(high[i] - close[i - 1]), abs(low[i] - close[i - 1]))
+
+    return tr
+
+# window Average True Range (ATR)
+def calculateATR(dataFrame, window):
+    atr = np.full(len(dataFrame), np.nan)
+    tr = calculateTR(dataFrame)
+
+    for i in range(window - 1, len(dataFrame)):
+        sumTR = 0
+        for j in range(i - window + 1, i + 1):
+            sumTR += tr[j]
+        atr[i] = sumTR / window
+
+    return atr
