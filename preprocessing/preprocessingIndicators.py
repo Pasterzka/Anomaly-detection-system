@@ -8,8 +8,15 @@ def preprocessingIndicators(dataFrame):
     window = 14
 
     print("[INFO] Calculating SMA...")
-    dataFrame['SMA14'] = calculateSMA(dataFrame, window)
+    sma = calculateSMA(dataFrame, window)
+    dataFrame['SMA14'] = sma
     print("[SUCCESS] SMA calculation completed.")
+
+    print("[INFO] Calculating EMA...")
+    ema = calculateEMA(dataFrame, window)
+    dataFrame['EMA14'] = ema
+    print("[SUCCESS] EMA calculation completed.")
+
 
     return dataFrame
 
@@ -25,3 +32,17 @@ def calculateSMA(dataFrame, window):
         sma[i] = suma / window
 
     return sma
+
+# window Exponential Moving Average (EMA)
+def calculateEMA(dataFrame, window):
+    ema = np.full(len(dataFrame), np.nan)
+    close = dataFrame['close'].values
+
+    # Initialize the first EMA value with the corresponding SMA value
+    ema[window - 1] = dataFrame['SMA14'].values[window - 1]
+
+    alpha = 2 / (window + 1)
+    for i in range(window, len(dataFrame)):
+        ema[i] = close[i] * alpha + ema[i - 1] * (1 - alpha)
+
+    return ema
