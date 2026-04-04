@@ -17,6 +17,11 @@ def preprocessingIndicators(dataFrame):
     dataFrame['EMA14'] = ema
     print("[SUCCESS] EMA calculation completed.")
 
+    print("[INFO] Calculating WMA...")
+    wma = calcualteWMA(dataFrame, window)
+    dataFrame['WMA14'] = wma
+    print("[SUCCESS] WMA calculation completed.")
+
 
     return dataFrame
 
@@ -47,3 +52,17 @@ def calculateEMA(dataFrame, window):
 
     return ema
 
+def calcualteWMA(dataFrame, window):
+    wma = np.full(len(dataFrame), np.nan)
+    close = dataFrame['close'].values
+
+    weights = np.arange(1, window + 1)
+    print(weights)
+    weightsSum = np.sum(weights)
+
+    for i in range(window - 1, len(dataFrame)):
+        suma = 0
+        for j in range(i - window + 1, i + 1):
+            suma += close[j] * weights[j - (i - window + 1)]
+        wma[i] = suma / weightsSum
+    return wma

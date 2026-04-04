@@ -29,14 +29,17 @@ if __name__ == "__main__":
     #print(dataFrame.head(10))
 
     dataFrame = preprocessingIndicators(dataFrame)
-    print(dataFrame.head(50))
+    print(dataFrame.head(20))
 
     dataFrame.plot(y='close', title='Close Price')
     plt.plot(dataFrame['SMA14'], label='SMA14')
     plt.plot(dataFrame['EMA14'], label='EMA14')
+    plt.plot(dataFrame['WMA14'], label='WMA14')
 
     plt.xlabel('Date')
     plt.ylabel('Price')
+    plt.title('Stock Price with Indicators')
+    plt.legend()
     plt.show()
 
 
