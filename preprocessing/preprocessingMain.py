@@ -1,5 +1,6 @@
 import sys
 import os
+import matplotlib.pyplot as plt
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -29,5 +30,13 @@ if __name__ == "__main__":
 
     dataFrame = preprocessingIndicators(dataFrame)
     print(dataFrame.head(50))
+
+    dataFrame.plot(y='close', title='Close Price')
+    plt.plot(dataFrame['SMA14'], label='SMA14')
+    plt.plot(dataFrame['EMA14'], label='EMA14')
+
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.show()
 
 

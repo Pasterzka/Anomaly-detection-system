@@ -46,3 +46,4 @@ def calculateEMA(dataFrame, window):
         ema[i] = close[i] * alpha + ema[i - 1] * (1 - alpha)
 
     return ema
+
