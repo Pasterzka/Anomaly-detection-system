@@ -1,4 +1,3 @@
-
 # This module contains functions for splitting the data into training, validation, and test sets, as well as normalizing the data.
 def splitAndNormalizeData(dataFrame):
     
