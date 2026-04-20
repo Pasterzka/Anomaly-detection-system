@@ -2,35 +2,20 @@ import sys
 import os
 import matplotlib.pyplot as plt
 
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from influxDB import influxDBConnection
 from preprocessingQuery import preprocessingQuery
 from preprocessingInterpolation import preprocessingInterpolation
 from preprocessingIndicators import preprocessingIndicators
+from preprocessingNormalization import splitAndNormalizeData
 
 
 stock = "AAPL"
 
 
-if __name__ == "__main__":
-
-    print("[INFO] Starting preprocessing...")
-
-    # download data frame from influxDB
-    client, writeAPI, queryApi = influxDBConnection.connectToInfluxDB()
-    dataFrame = preprocessingQuery(queryApi, stock)
-
-    #print(dataFrame.head(10))
-    # interpolation
-    dataFrame = preprocessingInterpolation(dataFrame)
-
-    print("[SUCCESS] Interpolation ended.")
-    #print(dataFrame.head(10))
-
-    dataFrame = preprocessingIndicators(dataFrame)
-    print(dataFrame.head(50))
-
+def plot(dataFrame):
     dataFrame.plot(y='close', title='Close Price')
     plt.plot(dataFrame['SMA14'], label='SMA14')
     plt.plot(dataFrame['EMA14'], label='EMA14')
@@ -49,4 +34,26 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
+if __name__ == "__main__":
+
+    print("[INFO] Starting preprocessing...")
+
+    # download data frame from influxDB
+    client, writeAPI, queryApi = influxDBConnection.connectToInfluxDB()
+    dataFrame = preprocessingQuery(queryApi, stock)
+
+    # interpolation
+    print("[INFO] Starting interpolation...")
+    dataFrame = preprocessingInterpolation(dataFrame)
+    print("[SUCCESS] Interpolation ended.")
+
+    # indicators calculation
+    print("[INFO] Starting indicators calculation...")
+    dataFrame = preprocessingIndicators(dataFrame)
+    print("[SUCCESS] Indicators calculation ended.")
+
+    # normalization
+    print("[INFO] Starting normalization...")
+    dataFrameTrain, dataFrameVal, dataFrameTest = splitAndNormalizeData(dataFrame)
+    print("[SUCCESS] Normalization ended.")
 
