@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Input, LSTM, Dense, RepeatVector, TimeDistributed
+from tensorflow.keras.callbacks import EarlyStopping
 
 class LSTMAnomalyDetector:
 
@@ -15,8 +16,6 @@ class LSTMAnomalyDetector:
         # ENCODER
         # 128 neurons read window
         model.add(LSTM(128, activation='relu', return_sequences=True))
-
-        # 64 close encoder
         model.add(LSTM(64, activation='relu', return_sequences=False))
 
         # BRIGE
@@ -25,8 +24,6 @@ class LSTMAnomalyDetector:
         # DECODER
         # 64 open decoder
         model.add(LSTM(64, activation='relu', return_sequences=True))
-
-        # 128 calculate output
         model.add(LSTM(128, activation='relu', return_sequences=True))
 
         # OUTPUT LAYER
@@ -46,28 +43,34 @@ class LSTMAnomalyDetector:
         # build model
         model = self.buildHybridAutoencoder(windowSize, numFeatures)
 
-        print("[INFO] Training LSTM Autoencoder model...")
+        earlyStopping = EarlyStopping(
+            monitor='val_loss', 
+            patience=5, restore_best_weights=True
+        )
+
+
         history = model.fit(
             x=trainData,
             y=trainData,
             epochs=50,
             batch_size=32,
             validation_data=(valData, valData),
+            callbacks=[earlyStopping],
             verbose=1
         )
 
-        print("[SUCCESS] LSTM Autoencoder model trained successfully!")
-
         print("[INFO] Calculating Reconstruction Error and Threshold...")
         trainPredictions = model.predict(trainData)
-        trainMSE = np.mean(np.power(trainData - trainPredictions, 2), axis=(1, 2))
+
+        # Last step MSE
+        trainMSE = np.mean(np.power(trainData[:, -1, :] - trainPredictions[:, -1, :], 2), axis=1)
 
         threshold = np.percentile(trainMSE, 95)
         print(f"[INFO] Anomaly Threshold set to: {threshold:.5f}")
 
         print("[INFO] Detecting anomalies in Test Data...")
         testPredictions = model.predict(testData)
-        testMSE = np.mean(np.power(testData - testPredictions, 2), axis=(1, 2))
+        testMSE = np.mean(np.power(testData[:, -1, :] - testPredictions[:, -1, :], 2), axis=1)
 
         anomaliesFlags = testMSE > threshold
         totalAnomalies = np.sum(anomaliesFlags)
