@@ -5,3 +5,5 @@ pandas
 scikit-learn
 numpy
 matplotlib
+tensorflow-macos
+tensorflow
