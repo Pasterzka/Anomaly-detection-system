@@ -4,6 +4,7 @@ import numpy as np
 class DataPreprocessor:
     def __init__(self, window_size=14):
         self.window_size = window_size
+        self.scalers = {}
 
     # Method to interpolate missing data in the DataFrame
     def interpolateData(self, df):
@@ -27,6 +28,9 @@ class DataPreprocessor:
             train_min = df_train[col].min()
             train_max = df_train[col].max()
 
+            # Save min and max 
+            self.scalers[col] = {'min': train_min, 'max': train_max}
+
             df_train[col] = self.normalizeColumn(df_train[col], train_min, train_max)
             df_val[col] = self.normalizeColumn(df_val[col], train_min, train_max)
             df_test[col] = self.normalizeColumn(df_test[col], train_min, train_max)
@@ -39,7 +43,17 @@ class DataPreprocessor:
         if denominator == 0:
             denominator = 1e-10
         return (series - min_val) / denominator
+    
+    # Method to denormalize a column using the stored min and max values
+    def denormalizeColumn(self,series, col_name):
+        if col_name not in self.scalers:
+            raise ValueError(f"[ERROR] No saved parameters for column '{col_name}'.")
 
+        min_val = self.scalers[col_name]['min']
+        max_val = self.scalers[col_name]['max']
+
+        return (series * (max_val - min_val)) + min_val
+    
     # Method to calculate moving windows for the given data array
     def calculateMovingWindows(self, data_array):
         moving_window = []

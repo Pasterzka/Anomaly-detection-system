@@ -8,6 +8,9 @@ class TechnicalIndicators:
 
     def apply_all(self, df):
         print("[INFO] Starting indicators preprocessing...\n")
+
+        df['Return'] = self.calculateReturn(df)
+
         df['SMA14'] = self.calculateSMA(df)
         df['EMA14'] = self.calculateEMA(df, self.window)
         df['WMA14'] = self.calculateWMA(df, self.window)
@@ -161,3 +164,12 @@ class TechnicalIndicators:
                 obv[i] = obv[i - 1]
 
         return obv
+    
+    def calculateReturn(self, dataFrame):
+        returns = np.full(len(dataFrame), np.nan)
+        close = dataFrame['close'].values
+
+        for i in range(1, len(dataFrame)):
+            returns[i] = (close[i] - close[i - 1]) / close[i - 1]
+
+        return returns

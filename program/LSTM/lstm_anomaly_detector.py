@@ -65,7 +65,7 @@ class LSTMAnomalyDetector:
         # Calculating Mean Squared Error for each training sequence
         train_mse = np.mean(np.power(train_data[:, -1, :] - train_predictions[:, -1, :], 2), axis=1)
 
-        self.threshold = np.percentile(train_mse, 95)
+        self.threshold = np.percentile(train_mse, 90)
         print(f"[INFO] Anomaly Threshold set to: {self.threshold:.5f}")
 
     # Method to detect anomalies in the test data based on the trained model and calculated threshold
