@@ -22,7 +22,7 @@ class InfluxDBManager:
         self.query_api = self.client.query_api()
 
     # Method to download stock data using yfinance and store it in InfluxDB
-    def downloadAndStoreData(self, stock, period="5y", interval="1d"):
+    def downloadAndStoreData(self, stock, period="10y", interval="1d"):
         print(f"[INFO] Downloading data for {stock}...")
         ticker_obj = yf.Ticker(stock)
         data = ticker_obj.history(period=period, interval=interval)
@@ -54,7 +54,7 @@ class InfluxDBManager:
         print(f"[INFO] Fetching data frame for {stock} from InfluxDB...")
         query = f'''
         from(bucket: "{self.bucket}")
-        |> range(start: -5y)
+        |> range(start: -10y)
         |> filter(fn: (r) => r["_measurement"] == "{self.bucket}")
         |> filter(fn: (r) => r["stock"] == "{stock}")
         |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")

@@ -24,6 +24,22 @@ class DataPreprocessor:
         df_val = df.iloc[train_end:val_end].copy()
         df_test = df.iloc[val_end:].copy()
 
+        # Clean the training set by removing outliers based on a 3 standard deviation threshold
+        print("[INFO] Cleaning training set...")
+        features_to_clean = [
+            'Return', 
+            'ROC14', 
+            'RSI14', 
+            'ATR14'
+        ]
+        for col in features_to_clean:
+            if col in df_train.columns:
+                mean_val = df_train[col].mean()
+                std_val = df_train[col].std()
+
+                outlier_condition = np.abs(df_train[col] - mean_val) > (3 * std_val)
+                df_train.loc[outlier_condition, col] = mean_val
+
         for col in df.columns:
             train_min = df_train[col].min()
             train_max = df_train[col].max()
