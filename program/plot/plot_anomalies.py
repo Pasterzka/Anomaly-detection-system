@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.ma as ma
 import matplotlib.pyplot as plt
 
 def plot_anomalies(df_test, anomalies_flags, window_size, stock):
@@ -51,6 +52,66 @@ def plot_anomalies_dual(df_test, anomalies_flags, window_size, stock):
     ax2.legend(loc="upper left", fontsize=12)
     ax2.grid(True, linestyle='--', alpha=0.6)
 
+    plt.gcf().autofmt_xdate()
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.93) 
+    plt.show()
+
+# Function to plot anomalies with the original price on top and used LSTM features on the bottom
+def plot_anomalies_with_features(df_test, anomalies_flags, window_size, stock, features, title_prefix="Point Anomalies", style="scatter"):
+    test_dates = df_test.index[window_size - 1:]
+    test_close_prices = df_test['close_real'].values[window_size - 1:]
+    
+    # Create a dual subplot configuration
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 12), sharex=True)
+    fig.suptitle(f"{title_prefix} Detection for {stock} (Test Set)", fontsize=18, fontweight='bold')
+
+    # ---------------- TOP PLOT: Close Price ----------------
+    ax1.plot(test_dates, test_close_prices, label=f'{stock} Close Price (USD)', color='royalblue', linewidth=1.5, zorder=1)
+    
+    if style == "scatter":
+        # Extract anomaly indices and corresponding dates/prices for scatter plot
+        anomaly_indices = np.where(anomalies_flags)[0]
+        anomaly_dates = test_dates[anomaly_indices]
+        anomaly_prices = test_close_prices[anomaly_indices]
+        ax1.scatter(anomaly_dates, anomaly_prices, color='red', label='Detected Anomalies', s=50, zorder=5)
+        
+    elif style == "line":
+        # Mask normal values so only contiguous anomaly segments are plotted as lines
+        anomalous_prices = ma.masked_where(~anomalies_flags, test_close_prices)
+        ax1.plot(test_dates, anomalous_prices, color='red', linewidth=3.5, label='Detected Anomalies (Segments)', zorder=5)
+
+    ax1.set_ylabel("Close Price (USD)", fontsize=12)
+    ax1.legend(loc="upper left", fontsize=12)
+    ax1.grid(True, linestyle='--', alpha=0.6)
+
+    # ---------------- BOTTOM PLOT: Features ----------------
+    colors = ['darkorange', 'green', 'purple', 'brown', 'pink', 'teal']
+    
+    for idx, feature in enumerate(features):
+        test_feature_vals = df_test[feature].values[window_size - 1:]
+        c = colors[idx % len(colors)]
+        
+        # Plot the continuous line for the feature
+        ax2.plot(test_dates, test_feature_vals, label=feature, color=c, linewidth=1.2, zorder=1, alpha=0.7)
+        
+        if style == "scatter":
+            anomaly_indices = np.where(anomalies_flags)[0]
+            anomaly_dates = test_dates[anomaly_indices]
+            anomaly_feature_vals = test_feature_vals[anomaly_indices]
+            ax2.scatter(anomaly_dates, anomaly_feature_vals, color='red', s=30, zorder=5)
+            
+        elif style == "line":
+            anomalous_feature_vals = ma.masked_where(~anomalies_flags, test_feature_vals)
+            # No label added here to prevent duplicating legends
+            ax2.plot(test_dates, anomalous_feature_vals, color='red', linewidth=2.5, zorder=5)
+            
+    ax2.set_xlabel("Date", fontsize=12)
+    ax2.set_ylabel("Normalized Feature Values", fontsize=12)
+    ax2.legend(loc="upper left", fontsize=10)
+    ax2.grid(True, linestyle='--', alpha=0.6)
+
+    # Format the dates nicely and present the plot
     plt.gcf().autofmt_xdate()
     plt.tight_layout()
     plt.subplots_adjust(top=0.93) 

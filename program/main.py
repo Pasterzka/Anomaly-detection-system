@@ -2,7 +2,7 @@ from influxDB.database_manager import InfluxDBManager
 from preprocessing.data_preprocesing import DataPreprocessor
 from preprocessing.technical_indicators import TechnicalIndicators
 from LSTM.lstm_anomaly_detector import LSTMAnomalyDetector
-from plot.plot_anomalies import plot_anomalies_dual
+from plot.plot_anomalies import plot_anomalies_dual, plot_anomalies_with_features
 
 import matplotlib.pyplot as plt
 
@@ -14,8 +14,6 @@ def main():
     print("[INFO] Starting program...")
 
     db_manager = InfluxDBManager()
-    
-    
     data_frame = db_manager.fetchStockData(STOCK)
 
     # Preprocessing: interpolation, technical indicators, normalization, and moving windows
@@ -48,13 +46,37 @@ def main():
     num_features = train_seq.shape[2]
     
     # Initialize the LSTM Anomaly Detector with the specified window size, number of features, and training parameters
-    detector = LSTMAnomalyDetector(window_size=WINDOW_SIZE, num_features=num_features, epochs=50)
+    detector = LSTMAnomalyDetector(window_size=WINDOW_SIZE, num_features=num_features, epochs=50, collective_window=5)
     detector.train(train_seq, val_seq)
-    anomalies = detector.detect(test_seq)
 
-    # Plot the detected anomalies on the test set
+    # Retrieve both point and collective anomalies
+    point_anomalies, collective_anomalies = detector.detect(test_seq)
+
     df_test['close_real'] = preprocessor.denormalizeColumn(df_test['close'], 'close')
-    plot_anomalies_dual(df_test, anomalies, WINDOW_SIZE, STOCK)
+
+    # Plot Point Anomalies (as red dots)
+    print("[INFO] Plotting Point Anomalies...")
+    plot_anomalies_with_features(
+        df_test=df_test, 
+        anomalies_flags=point_anomalies, 
+        window_size=WINDOW_SIZE, 
+        stock=STOCK, 
+        features=features_to_use, 
+        title_prefix="Point Anomalies",
+        style="scatter" # Używamy punktów
+    )
+    
+    # Plot Collective Anomalies (as bold red lines)
+    print("[INFO] Plotting Collective Anomalies...")
+    plot_anomalies_with_features(
+        df_test=df_test, 
+        anomalies_flags=collective_anomalies, 
+        window_size=WINDOW_SIZE, 
+        stock=STOCK, 
+        features=features_to_use, 
+        title_prefix="Collective Anomalies",
+        style="line" # Używamy segmentów linii
+    )
 
 def test():
     print("[INFO] Starting program...")
