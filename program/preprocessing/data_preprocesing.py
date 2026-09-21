@@ -18,7 +18,7 @@ class DataPreprocessor:
         print("[INFO] Splitting and normalizing data...")
         n = len(df)
         train_end = int(n * 0.7)
-        val_end = int(n * 0.85)
+        val_end = int(n * 0.7)
 
         df_train = df.iloc[:train_end].copy()
         df_val = df.iloc[train_end:val_end].copy()
