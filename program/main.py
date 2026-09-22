@@ -3,6 +3,7 @@ from preprocessing.data_preprocesing import DataPreprocessor
 from preprocessing.technical_indicators import TechnicalIndicators
 from rules.point_anomaly_detector import PointAnomalyDetector  
 from rules.collective_anomaly_detector import CollectiveAnomalyDetector
+from rules.contextual_anomaly_detector import ContextualAnomalyDetector
 from plot.plot_anomalies import plot_anomalies_with_features
 
 import matplotlib.pyplot as plt
@@ -11,7 +12,9 @@ def main():
     print("[INFO] Starting program...")
     STOCK = "AAPL"
     
-    WINDOW_SIZE = 14 
+    WINDOW_SIZE = 14
+    METHOD = "iqr"
+    MULTIPLIER = 1.5
     
     db_manager = InfluxDBManager()
     data_frame = db_manager.fetchStockData(STOCK)
@@ -35,15 +38,20 @@ def main():
 
     # Point anomally
     print(f"[INFO] Initializing Classical Point Anomaly Detector on feature '{target_feature}'...")
-    detector = PointAnomalyDetector(method='iqr', multiplier=1.5)
+    detector = PointAnomalyDetector(method=METHOD, multiplier=MULTIPLIER)
     detector.fit(df_train[target_feature])
     point_anomalies = detector.detect(df_test[target_feature])
 
     # Collective anomaly
     print(f"[INFO] Initializing Collective Anomaly Detector on feature '{target_feature}'...")
-    collective_detector = CollectiveAnomalyDetector(window_size=5, multiplier=1.5)
+    collective_detector = CollectiveAnomalyDetector(window_size=5, multiplier=MULTIPLIER, method=METHOD)
     collective_detector.fit(df_train[target_feature])
     collective_anomalies = collective_detector.detect(df_test[target_feature])
+
+    # Contextual anomaly
+    contextual_detector = ContextualAnomalyDetector(window_size=WINDOW_SIZE, method=METHOD, multiplier=MULTIPLIER)
+    contextual_detector.fit(df_train[target_feature]) 
+    contextual_anomalies = contextual_detector.detect(df_test[target_feature])
 
     # Denormalize 'close' price for a realistic plot representation
     df_test['close_real'] = preprocessor.denormalizeColumn(df_test['close'], 'close')
@@ -70,6 +78,17 @@ def main():
         features=[target_feature], 
         title_prefix="Classical Collective Anomalies",
         style="line" 
+    )
+
+    print("\n[INFO] Plotting Contextual Anomalies...")
+    plot_anomalies_with_features(
+        df_test=df_test, 
+        anomalies_flags=contextual_anomalies, 
+        window_size=1,  
+        stock=STOCK, 
+        features=[target_feature], 
+        title_prefix="Contextual Anomalies",
+        style="scatter" 
     )
 
 if __name__ == "__main__":
