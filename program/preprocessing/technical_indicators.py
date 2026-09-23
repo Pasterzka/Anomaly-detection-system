@@ -11,7 +11,8 @@ class TechnicalIndicators:
 
         df['Return'] = self.calculateReturn(df)
 
-        df['SMA14'] = self.calculateSMA(df)
+        df['SMA14'] = self.calculateSMA(df, self.window)
+        df['SMA50'] = self.calculateSMA(df, 50)
         df['EMA14'] = self.calculateEMA(df, self.window)
         df['WMA14'] = self.calculateWMA(df, self.window)
         df['ATR14'] = self.calculateATR(df, self.window)
@@ -23,15 +24,15 @@ class TechnicalIndicators:
         return df
 
     # window Simple Moving Average (SMA)
-    def calculateSMA(self, dataFrame):
+    def calculateSMA(self, dataFrame, window):
         sma = np.full(len(dataFrame), np.nan)
         close = dataFrame['close'].values
 
-        for i in range(self.window - 1, len(dataFrame)):
+        for i in range(window - 1, len(dataFrame)):
             sum = 0
-            for j in range(i - self.window + 1, i + 1):
+            for j in range(i - window + 1, i + 1):
                 sum += close[j]
-            sma[i] = sum / self.window
+            sma[i] = sum / window
 
         return sma
     

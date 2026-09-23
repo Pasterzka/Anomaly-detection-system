@@ -51,7 +51,7 @@ def main():
     # Contextual anomaly
     contextual_detector = ContextualAnomalyDetector(window_size=WINDOW_SIZE, method=METHOD, multiplier=MULTIPLIER)
     contextual_detector.fit(df_train[target_feature]) 
-    contextual_anomalies = contextual_detector.detect(df_test[target_feature])
+    contextual_anomalies = contextual_detector.detect(test_series=df_test[target_feature], trend_series=df_test['SMA50'])
 
     # Denormalize 'close' price for a realistic plot representation
     df_test['close_real'] = preprocessor.denormalizeColumn(df_test['close'], 'close')
