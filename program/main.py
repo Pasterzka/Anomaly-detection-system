@@ -20,7 +20,7 @@ def main():
     data_frame = db_manager.fetchStockData(STOCK)
 
     # Preprocessing: interpolation and technical indicators
-    preprocessor = DataPreprocessor(window_size=WINDOW_SIZE)
+    preprocessor = DataPreprocessor(window_size=WINDOW_SIZE, method=METHOD, multiplier=MULTIPLIER)
     indicators = TechnicalIndicators(window=WINDOW_SIZE)
 
     print("[INFO] Interpolating data and calculating technical indicators...")
@@ -82,13 +82,13 @@ def main():
 
     print("\n[INFO] Plotting Contextual Anomalies...")
     plot_anomalies_with_features(
-        df_test=df_test, 
-        anomalies_flags=contextual_anomalies, 
-        window_size=1,  
-        stock=STOCK, 
-        features=[target_feature], 
-        title_prefix="Contextual Anomalies",
-        style="scatter" 
+       df_test=df_test, 
+       anomalies_flags=contextual_anomalies, 
+       window_size=1,  
+       stock=STOCK, 
+       features=[target_feature], 
+       title_prefix="Contextual Anomalies",
+       style="scatter" 
     )
 
 if __name__ == "__main__":

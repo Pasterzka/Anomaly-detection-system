@@ -2,9 +2,11 @@ import numpy as np
 
 # This class is responsible for preprocessing the data, including interpolation, splitting, normalization, and calculating moving windows.
 class DataPreprocessor:
-    def __init__(self, window_size=14):
+    def __init__(self, window_size=14, method="3sigma", multiplier=3.0 ):
         self.window_size = window_size
         self.scalers = {}
+        self.method = method
+        self.multiplier = multiplier
 
     # Method to interpolate missing data in the DataFrame
     def interpolateData(self, df):
@@ -28,17 +30,33 @@ class DataPreprocessor:
         print("[INFO] Cleaning training set...")
         features_to_clean = [
             'Return', 
-            'ROC14', 
-            'RSI14', 
-            'ATR14'
+            #'ROC14', 
+            #'RSI14', 
+            #'ATR14'
         ]
         for col in features_to_clean:
             if col in df_train.columns:
-                mean_val = df_train[col].mean()
-                std_val = df_train[col].std()
+                if self.method == "3sigma":
+                    mean_val = df_train[col].mean()
+                    std_val = df_train[col].std()
 
-                outlier_condition = np.abs(df_train[col] - mean_val) > (3 * std_val)
-                df_train.loc[outlier_condition, col] = mean_val
+                    outlier_condition = np.abs(df_train[col] - mean_val) > (self.multiplier * std_val)
+                    df_train.loc[outlier_condition, col] = mean_val
+
+                elif self.method == "iqr":
+                    q1 = df_train[col].quantile(0.25)
+                    q3 = df_train[col].quantile(0.75)
+                    median_val = df_train[col].quantile(0.5)
+                    iqr = q3 - q1
+
+                    lower_bound = q1 - (self.multiplier * iqr)
+                    upper_bound = q3 + (self.multiplier * iqr)
+
+                    outlier_condition = (df_train[col] < lower_bound) | (df_train[col] > upper_bound)
+                    df_train.loc[outlier_condition, col] = median_val
+
+            outlier_count = int(outlier_condition.sum())
+            print(f"[SUCCESS] Found {outlier_count} outlied points.")
 
         for col in df.columns:
             train_min = df_train[col].min()
