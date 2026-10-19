@@ -3,7 +3,7 @@ import pandas as pd
 
 # Contextual anomaly
 class newContextualAnomalyDetector:
-    def __init__(self, method='3sigma', multiplier=3.0, window_size=14, strict_factor_lower=0.8, strict_factor_upper=1.4):
+    def __init__(self, method='3sigma', multiplier=3.0, window_size=14, strict_factor_lower=0.8, strict_factor_upper=1.2):
         self.method = method
         self.multiplier = multiplier
         self.window_size = window_size
@@ -49,6 +49,6 @@ class newContextualAnomalyDetector:
         anomalies_flag = (series > upper_bound) | (series < lower_bound)
 
         anomalies_num = anomalies_flag.sum()
-        print(f"[SUCCESS] Detected {anomalies_num} contextual anomalies")
+        print(f"[SUCCESS] Detected {anomalies_num} {self.method} contextual anomalies")
 
         return anomalies_flag.fillna(False).values

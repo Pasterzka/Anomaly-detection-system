@@ -42,7 +42,7 @@ class newCollectiveAnomalyDetector:
             anomalies_flag.iloc[window_start:window_end] = True
 
         anomalies_num = anomalies_windows.sum()
-        print(f"[SUCCESS] Detected {anomalies_num} collective anomalies")
+        print(f"[SUCCESS] Detected {anomalies_num} {self.method} collective anomalies")
 
         return anomalies_flag.fillna(False).values
 

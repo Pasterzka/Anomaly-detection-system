@@ -30,6 +30,6 @@ class newPointAnomalyDetector:
         anomalies_flag = (series > upper_bound) | (series < lower_bound)
 
         anomalies_num = anomalies_flag.sum()
-        print(f"[SUCCESS] Detected {anomalies_num} point anomalies")
+        print(f"[SUCCESS] Detected {anomalies_num} {self.method} point anomalies")
 
         return anomalies_flag.fillna(False).values
