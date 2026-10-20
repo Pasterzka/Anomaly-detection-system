@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import LocalOutlierFactor
+from sklearn.preprocessing import StandardScaler
 
 class LOFPointAnomalyDetector:
     def __init__(self, neighbours=14, contamination=0.01):
@@ -69,16 +70,35 @@ class LOFColectiveAbomalyDetector:
         return anomalies_flag.values,lof_scores.values
 
 class LOFContextualAnomalyDetector:
-    def __init__(self, neighbours=14, contamination=0.01):
+    def __init__(self, neighbours=14, contamination=0.01, penalty_factor=1.5, reward_factor=0.5):
         self.neighbours = neighbours
         self.contamination = contamination
+        self.penalty = penalty_factor
+        self.reward = reward_factor
 
     def detect(self, series, context_series):
 
-        # Conacat series and context series
-        context = pd.concat([series, context_series], axis=1).dropna()
+        # Calculate deviation
+        deviation = series - context_series
 
-        X = context.values
+        # Caluclate trend
+        is_uptrend = context_series.diff().shift(1) > 0
+
+        multiplied_deviation = deviation.copy()
+
+        # Upper trend 
+        multiplied_deviation[is_uptrend & (deviation<0)] *= self.penalty
+        multiplied_deviation[is_uptrend & (deviation>0)] *= self.reward
+
+        multiplied_deviation[~is_uptrend & (deviation>0)] *= self.penalty
+        multiplied_deviation[~is_uptrend & (deviation<0)] *= self.reward
+
+
+
+        # Conacat series and context series
+        context = pd.concat([series, multiplied_deviation], axis=1).dropna()
+
+        X = StandardScaler().fit_transform(context.values)
 
         # Inicjalization
         clf = LocalOutlierFactor(n_neighbors=self.neighbours, contamination=self.contamination)

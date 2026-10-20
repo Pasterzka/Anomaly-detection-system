@@ -20,7 +20,7 @@ def main():
     NEIGBOURS = 20
     CONTAMINATION = 0.05
 
-    EPS = 0.1
+    EPS = 0.3
     SAMPLE = 10
 
     # Connect to influxDB
@@ -134,15 +134,15 @@ def main():
     #     title="Contextual Anomalies"
     # )
 
-    # print("[INFO] Plotting LOF Contextual Anomalies...")
-    # lof_plot_anomalies(
-    #     df=data_frame, 
-    #     anomalies_array=lof_contextual_anomalies, 
-    #     lof_scores=lof_contextual_anomaly_score, 
-    #     target_feature='close', 
-    #     stock_name=STOCK, 
-    #     title="LOF Contextual Anomalies"
-    # )
+    print("[INFO] Plotting LOF Contextual Anomalies...")
+    lof_plot_anomalies(
+        df=data_frame, 
+        anomalies_array=lof_contextual_anomalies, 
+        lof_scores=lof_contextual_anomaly_score, 
+        target_feature='close', 
+        stock_name=STOCK, 
+        title="LOF Contextual Anomalies"
+    )
 
     print("[INFO] Plotting DBSCAN Contextual Anomalies...")
     new_plot_anomalies(

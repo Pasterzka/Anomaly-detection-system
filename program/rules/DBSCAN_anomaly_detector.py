@@ -63,21 +63,39 @@ class DBSCANCollectiveAnomalyDetector:
         return anomalies_flag.values
 
 class DBSCANContextualAnomalyDetector:
-    def __init__(self, eps=0.5, min_sample=5):
+    def __init__(self, eps=0.5, min_sample=5, penalty_factor=1.5, reward_factor=0.5):
         self.eps = eps
         self.min_sample = min_sample
+        self.penalty = penalty_factor
+        self.reward = reward_factor
 
     def detect(self, series, context_series):
 
-        context = pd.concat([series, context_series], axis=1).dropna()
-
-        # Make series 2D        
-        X = context.values
-        X_scaled = StandardScaler().fit_transform(X)
+        # Calculate deviation
+        deviation = series - context_series
+        
+        # Caluclate trend
+        is_uptrend = context_series.diff().shift(1) > 0
+        
+        multiplied_deviation = deviation.copy()
+        
+        # Upper trend 
+        multiplied_deviation[is_uptrend & (deviation<0)] *= self.penalty
+        multiplied_deviation[is_uptrend & (deviation>0)] *= self.reward
+        
+        multiplied_deviation[~is_uptrend & (deviation>0)] *= self.penalty
+        multiplied_deviation[~is_uptrend & (deviation<0)] *= self.reward
+        
+        
+        
+        # Conacat series and context series
+        context = pd.concat([series, multiplied_deviation], axis=1).dropna()
+        
+        X = StandardScaler().fit_transform(context.values)
     
         # Inicjalization
         dbscan = DBSCAN(eps=self.eps, min_samples=self.min_sample)
-        y_pred = dbscan.fit_predict(X_scaled)
+        y_pred = dbscan.fit_predict(X)
     
     
         anomalies_flag = pd.Series(False, index=series.index)
