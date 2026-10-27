@@ -116,23 +116,23 @@ def main():
 
     # Contextual anomalies
     contextual_detector = newContextualAnomalyDetector(method=METHOD, multiplier=MULTIPLIER, window_size=WINDOW_SIZE)
-    contextual_anomalies = contextual_detector.detect(series=data_frame[target_feature], context_series=data_frame['SMA50'])
+    contextual_anomalies = contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
 
     lof_contextual_detector = LOFContextualAnomalyDetector(neighbours=NEIGBOURS, contamination=CONTAMINATION)
-    lof_contextual_anomalies, lof_contextual_anomaly_score = lof_contextual_detector.detect(series=data_frame[target_feature], context_series=data_frame['SMA50'])
+    lof_contextual_anomalies, lof_contextual_anomaly_score = lof_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
 
     dbscan_contextual_detector = DBSCANContextualAnomalyDetector(eps=EPS, min_sample=SAMPLE)
-    dbscan_contextual_anomalies = dbscan_contextual_detector.detect(data_frame[target_feature], data_frame['SMA50'])
+    dbscan_contextual_anomalies = dbscan_contextual_detector.detect(data_frame['close'], data_frame['SMA50'], return_series=data_frame['Return'])
     
 
-    # print("[INFO] Plotting Contextual Anomalies...")
-    # new_plot_anomalies(
-    #     df=data_frame, 
-    #     anomalies_array=contextual_anomalies, 
-    #     target_feature='close', 
-    #     stock_name=STOCK, 
-    #     title="Contextual Anomalies"
-    # )
+    print("[INFO] Plotting Contextual Anomalies...")
+    new_plot_anomalies(
+        df=data_frame, 
+        anomalies_array=contextual_anomalies, 
+        target_feature='close', 
+        stock_name=STOCK, 
+        title="Contextual Anomalies"
+    )
 
     print("[INFO] Plotting LOF Contextual Anomalies...")
     lof_plot_anomalies(

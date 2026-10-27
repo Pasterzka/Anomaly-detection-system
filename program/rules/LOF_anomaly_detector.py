@@ -76,7 +76,7 @@ class LOFContextualAnomalyDetector:
         self.penalty = penalty_factor
         self.reward = reward_factor
 
-    def detect(self, series, context_series):
+    def detect(self, series, context_series, return_series):
 
         # Calculate deviation
         deviation = series - context_series
@@ -96,7 +96,7 @@ class LOFContextualAnomalyDetector:
 
 
         # Conacat series and context series
-        context = pd.concat([series, multiplied_deviation], axis=1).dropna()
+        context = pd.concat([return_series, multiplied_deviation], axis=1).dropna()
 
         X = StandardScaler().fit_transform(context.values)
 
@@ -106,13 +106,13 @@ class LOFContextualAnomalyDetector:
 
         X_scores = clf.negative_outlier_factor_
 
-        anomalies_flag = pd.Series(False, index=series.index)
+        anomalies_flag = pd.Series(False, index=return_series.index)
         anomalies_flag.loc[context.dropna().index] = (y_pred == -1)
 
-        lof_scores = pd.Series(np.nan, index=series.index)
+        lof_scores = pd.Series(np.nan, index=return_series.index)
         lof_scores.loc[context.dropna().index] = X_scores
 
         anomalies_num = anomalies_flag.sum()
-        print(f"[SUCCESS] Detected {anomalies_num} LOF point anomalies")
+        print(f"[SUCCESS] Detected {anomalies_num} LOF contextual anomalies")
 
         return anomalies_flag.values,lof_scores.values

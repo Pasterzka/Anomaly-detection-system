@@ -10,7 +10,7 @@ class newContextualAnomalyDetector:
         self.strict_factor_lower = strict_factor_lower
         self.strict_factor_upper = strict_factor_upper
 
-    def detect(self, series, context_series):
+    def detect(self, series, context_series, return_series):
         print("[INFO] Detecting contextual anomalies...")
 
         # check trend

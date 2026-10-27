@@ -69,7 +69,7 @@ class DBSCANContextualAnomalyDetector:
         self.penalty = penalty_factor
         self.reward = reward_factor
 
-    def detect(self, series, context_series):
+    def detect(self, series, context_series, return_series):
 
         # Calculate deviation
         deviation = series - context_series
@@ -89,7 +89,7 @@ class DBSCANContextualAnomalyDetector:
         
         
         # Conacat series and context series
-        context = pd.concat([series, multiplied_deviation], axis=1).dropna()
+        context = pd.concat([return_series, multiplied_deviation], axis=1).dropna()
         
         X = StandardScaler().fit_transform(context.values)
     
@@ -98,11 +98,11 @@ class DBSCANContextualAnomalyDetector:
         y_pred = dbscan.fit_predict(X)
     
     
-        anomalies_flag = pd.Series(False, index=series.index)
+        anomalies_flag = pd.Series(False, index=return_series.index)
         anomalies_flag.loc[context.dropna().index] = (y_pred == -1)
     
         anomalies_num = anomalies_flag.sum()
-        print(f"[SUCCESS] Detected {anomalies_num} DBSCAN point anomalies")
+        print(f"[SUCCESS] Detected {anomalies_num} DBSCAN contextual anomalies")
     
         return anomalies_flag.values
 
