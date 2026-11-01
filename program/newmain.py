@@ -7,6 +7,7 @@ from rules.new_contextual_anomaly_detector import newContextualAnomalyDetector
 from rules.LOF_anomaly_detector import LOFPointAnomalyDetector, LOFColectiveAbomalyDetector, LOFContextualAnomalyDetector
 from rules.DBSCAN_anomaly_detector import DBSCANPointAnomalyDetector, DBSCANCollectiveAnomalyDetector, DBSCANContextualAnomalyDetector
 from plot.new_polt_anomalies import new_plot_anomalies, lof_plot_anomalies
+from plot.labeling_plot import export_data_for_labeling, plot_for_manual_labeling
 
 def main():
 
@@ -41,8 +42,11 @@ def main():
     target_feature = "Return"
 
     # Point anomalies
-    point_detector = newPointAnomalyDetector(method=METHOD, multiplier=MULTIPLIER, window_size=WINDOW_SIZE)
-    point_anomalies = point_detector.detect(data_frame['Return'])
+    iqr_point_detector = newPointAnomalyDetector(method='iqr', multiplier=1.5, window_size=WINDOW_SIZE)
+    iqr_point_anomalies = iqr_point_detector.detect(data_frame['Return'])
+
+    sigma_point_detector = newPointAnomalyDetector(method='3sigma', multiplier=3.0, window_size=WINDOW_SIZE)
+    sigma_point_anomalies = sigma_point_detector.detect(data_frame['Return'])
 
     lof_point_detector = LOFPointAnomalyDetector(neighbours=NEIGBOURS, contamination=CONTAMINATION)
     lof_point_anomalies, lof_point_anomaly_score = lof_point_detector.detect(data_frame[target_feature])
@@ -75,14 +79,23 @@ def main():
     df_plot = data_frame.tail(PLOT_DAYS)
     print(f"\n[INFO] Data to anlize: from {df_plot.index.min().date()} to {df_plot.index.max().date()}\n")
     
-    print("[INFO] Plotting Point Anomalies...")
-    new_plot_anomalies(
-        df=data_frame[-PLOT_DAYS:], 
-        anomalies_array=point_anomalies[-PLOT_DAYS:], 
-        target_feature='close', 
-        stock_name=STOCK, 
-        title="Point Anomalies"
-    )
+    # print("[INFO] Plotting IQR Point Anomalies...")
+    # new_plot_anomalies(
+    #     df=data_frame[-PLOT_DAYS:], 
+    #     anomalies_array=iqr_point_anomalies[-PLOT_DAYS:], 
+    #     target_feature='close', 
+    #     stock_name=STOCK, 
+    #     title="Point Anomalies"
+    # )
+
+    # print("[INFO] Plotting 3sigma Point Anomalies...")
+    # new_plot_anomalies(
+    #     df=data_frame[-PLOT_DAYS:], 
+    #     anomalies_array=sigma_point_anomalies[-PLOT_DAYS:], 
+    #     target_feature='close', 
+    #     stock_name=STOCK, 
+    #     title="Point Anomalies"
+    # )
 
     # print("[INFO] Plotting LOF Anomalies...")
     # lof_plot_anomalies(
@@ -160,6 +173,9 @@ def main():
     #     stock_name=STOCK, 
     #     title="DBSCAN Contextual Anomalies"
     # )
+
+    # export_data_for_labeling(df_plot, filename="intel_labeling_dataset.csv")
+    plot_for_manual_labeling(df_plot, STOCK)
 
 
 
