@@ -30,6 +30,8 @@ class InfluxDBManager:
 
         if data.empty:
             sys.exit(f"[ERROR] No data found for {stock}.")
+
+        print(f"[INFO] Data download form yfince: from {data.index.min().date()} to {data.index.max().date()}")
         
         print(f"[SUCCESS] Data for {stock} downloaded. Importing to InfluxDB...")
         points = []
@@ -74,4 +76,29 @@ class InfluxDBManager:
         df.sort_index(inplace=True)
 
         return df
-    
+
+    def newFeatchStockData(self, stock, start_range="-200d"):
+        print(f"[INFO] Fetching data frame for {stock} from InfluxDB...")
+
+        query = f'''
+        from(bucket: "{self.bucket}")
+        |> range(start: {start_range})
+        |> filter(fn: (r) => r["_measurement"] == "{self.bucket}")
+        |> filter(fn: (r) => r["stock"] == "{stock}")
+        |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+        |> keep(columns: ["_time", "open", "high", "low", "close", "volume"])
+        '''
+
+        df = self.query_api.query_data_frame(query)
+
+        if df.empty:
+            sys.exit("[ERROR] Data frame is empty.")
+
+        print(f"[SUCCESS] Data frame for {stock} fetched successfully.")
+        df = df.drop(columns=['result', 'table'], errors='ignore')
+        df.rename(columns={'_time': 'Date'}, inplace=True)
+        df['Date'] = pd.to_datetime(df['Date']).dt.tz_localize(None)
+        df.set_index('Date', inplace=True)
+        df.sort_index(inplace=True)
+
+        return df
