@@ -53,7 +53,7 @@ def main():
     sigma_point_anomalies, sigma_point_xai, sigma_upper_bound_point, sigma_lower_bound_point  = sigma_point_detector.detect(data_frame['Return'])
 
     lof_point_detector = LOFPointAnomalyDetector(neighbours=NEIGBOURS, contamination=CONTAMINATION)
-    lof_point_anomalies, lof_point_anomaly_score = lof_point_detector.detect(data_frame[target_feature])
+    lof_point_anomalies, lof_point_xai, lof_point_anomaly_score = lof_point_detector.detect(data_frame[target_feature])
 
     dbscan_point_detector = DBSCANPointAnomalyDetector(eps=EPS, min_sample=SAMPLE)
     dbscan_point_anomalies = dbscan_point_detector.detect(data_frame[target_feature])
@@ -66,7 +66,7 @@ def main():
     sigma_collective_anomalies, sigma_collective_xai, sigma_upper_bound_collective, sigma_lower_bound_collective = sigma_collective_detector.detect(data_frame['Return'])
 
     lof_collective_detector = LOFColectiveAbomalyDetector(window_size=7, neighbours=NEIGBOURS, contamination=CONTAMINATION)
-    lof_collective_anomalies, lof_collective_anomaly_score = lof_collective_detector.detect(data_frame[target_feature])
+    lof_collective_anomalies, lof_collective_xai,lof_collective_anomaly_score = lof_collective_detector.detect(data_frame[target_feature])
 
     dbscan_collective_detector = DBSCANCollectiveAnomalyDetector(window_size=7, eps=EPS, min_sample=SAMPLE)
     dbscan_collective_anomalies = dbscan_collective_detector.detect(data_frame[target_feature])
@@ -79,7 +79,7 @@ def main():
     sigma_contextual_anomalies, sigma_contextual_xai, sigma_upper_bound_contextual, sigma_lower_bound_contextual = sigma_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
     
     lof_contextual_detector = LOFContextualAnomalyDetector(neighbours=NEIGBOURS, contamination=CONTAMINATION)
-    lof_contextual_anomalies, lof_contextual_anomaly_score = lof_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
+    lof_contextual_anomalies, lof_contextual_xai, lof_contextual_anomaly_score = lof_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
 
     dbscan_contextual_detector = DBSCANContextualAnomalyDetector(eps=EPS, min_sample=SAMPLE)
     dbscan_contextual_anomalies = dbscan_contextual_detector.detect(data_frame['close'], data_frame['SMA50'], return_series=data_frame['Return'])
@@ -98,17 +98,17 @@ def main():
     #     title="Point Anomalies"
     # )
 
-    print("[INFO] Plotting 3sigma Point Anomalies...")
-    statistic_plot_anomalies(
-        df=data_frame[-PLOT_DAYS:], 
-        anomalies_array=sigma_point_anomalies[-PLOT_DAYS:], 
-        target_feature='close', 
-        stock_name=STOCK, 
-        title="Z-Score Point Anomalies",
-        lower_bound=sigma_lower_bound_point[-PLOT_DAYS:],  
-        upper_bound=sigma_upper_bound_point[-PLOT_DAYS:], 
-        metric_feature='Return' 
-    )
+    # print("[INFO] Plotting 3sigma Point Anomalies...")
+    # statistic_plot_anomalies(
+    #     df=data_frame[-PLOT_DAYS:], 
+    #     anomalies_array=sigma_point_anomalies[-PLOT_DAYS:], 
+    #     target_feature='close', 
+    #     stock_name=STOCK, 
+    #     title="Z-Score Point Anomalies",
+    #     lower_bound=sigma_lower_bound_point[-PLOT_DAYS:],  
+    #     upper_bound=sigma_upper_bound_point[-PLOT_DAYS:], 
+    #     metric_feature='Return' 
+    # )
 
     # print("[INFO] Plotting 3sigma Point Anomalies...")
     # new_plot_anomalies(
@@ -227,8 +227,11 @@ def main():
     existing_df['XAI_IQR_Contextual'] = iqr_contextual_xai[-PLOT_DAYS:]
 
     existing_df['LOF_Point'] = lof_point_anomalies[-PLOT_DAYS:].astype(int)
+    existing_df['XAI_LOF_Point'] = lof_point_xai[-PLOT_DAYS:]
     existing_df['LOF_Collective'] = lof_collective_anomalies[-PLOT_DAYS:].astype(int)
+    existing_df['XAI_LOF_Collective'] = lof_collective_xai[-PLOT_DAYS:]
     existing_df['LOF_Contextual'] = lof_contextual_anomalies[-PLOT_DAYS:].astype(int)
+    existing_df['XAI_LOF_Contextual'] = lof_contextual_xai[-PLOT_DAYS:]
 
     existing_df['DBSCAN_Point'] = dbscan_point_anomalies[-PLOT_DAYS:].astype(int)
     existing_df['DBSCAN_Collective'] = dbscan_collective_anomalies[-PLOT_DAYS:].astype(int)

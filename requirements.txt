@@ -9,3 +9,4 @@ tensorflow-macos
 tensorflow
 plotly
 openpyxl
+shap
