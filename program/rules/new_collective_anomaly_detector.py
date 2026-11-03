@@ -12,6 +12,8 @@ class newCollectiveAnomalyDetector:
 
         print("[INFO] Detecting collectiv anomalies...")
 
+        explanations = pd.Series("", index=series.index)
+
         # Sum of small group
         group_metric = series.rolling(window=self.window_size).sum()
 
@@ -41,8 +43,22 @@ class newCollectiveAnomalyDetector:
             window_end = idx_num + 1
             anomalies_flag.iloc[window_start:window_end] = True
 
+            metric_val = group_metric.loc[idx]
+            upper_val = upper_bound.loc[idx]
+            lower_val = lower_bound.loc[idx]
+
+            if metric_val > upper_val:
+                info = "Point of detection anomally where Return Value is above the anomaly threshold."
+            else:
+                info = "Point of detection anomally where Return Value is lower the anomaly threshold."
+
+            explanations.iloc[window_start:window_end] = "Collective anomally detected."
+            explanations.loc[idx] = info
+
+            
+
         anomalies_num = anomalies_windows.sum()
         print(f"[SUCCESS] Detected {anomalies_num} {self.method} collective anomalies")
 
-        return anomalies_flag.fillna(False).values
+        return anomalies_flag.fillna(False).values, explanations.values
 

@@ -63,7 +63,7 @@ class DBSCANCollectiveAnomalyDetector:
         return anomalies_flag.values
 
 class DBSCANContextualAnomalyDetector:
-    def __init__(self, eps=0.5, min_sample=5, penalty_factor=1.5, reward_factor=0.5):
+    def __init__(self, eps=0.5, min_sample=5, penalty_factor=1.2, reward_factor=0.8):
         self.eps = eps
         self.min_sample = min_sample
         self.penalty = penalty_factor

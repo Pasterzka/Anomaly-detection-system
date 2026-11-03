@@ -11,6 +11,8 @@ class newPointAnomalyDetector:
     def detect(self, series):
         print("[INFO] Detecting point anomalies...")
 
+        explanations = pd.Series("", index=series.index)
+
         if self.method == '3sigma':
             roling_mean = series.rolling(window=self.window_size).mean().shift(1)
             roling_std = series.rolling(window=self.window_size).std().shift(1)
@@ -28,8 +30,10 @@ class newPointAnomalyDetector:
             upper_bound = q3 + iqr * self.multiplier
 
         anomalies_flag = (series > upper_bound) | (series < lower_bound)
+        explanations[series > upper_bound] = "Return value is above the anomaly threshold"
+        explanations[series < lower_bound] = "Return value is lower the anomaly threshold"
 
         anomalies_num = anomalies_flag.sum()
         print(f"[SUCCESS] Detected {anomalies_num} {self.method} point anomalies")
 
-        return anomalies_flag.fillna(False).values
+        return anomalies_flag.fillna(False).values, explanations.values

@@ -15,6 +15,7 @@ class newContextualAnomalyDetector:
 
         # check trend
         is_uptrend = context_series.diff().shift(1) > 0
+        explanations = pd.Series("", index=series.index)
 
         if self.method == '3sigma':
             roling_mean = series.rolling(window=self.window_size).mean().shift(1)
@@ -48,7 +49,22 @@ class newContextualAnomalyDetector:
 
         anomalies_flag = (series > upper_bound) | (series < lower_bound)
 
+        above_bound = series > upper_bound
+        below_bound = series < lower_bound
+
+        mask1 = below_bound & is_uptrend
+        explanations[mask1] = "Return value is below anomaly threshold during an uptrend."
+
+        mask2 = below_bound & (~is_uptrend)
+        explanations[mask2] = "Return value is below anomaly threshold during a downtrend."
+
+        mask3 = above_bound & (~is_uptrend)
+        explanations[mask3] = "Return value is above anomaly threshold during a downtrend."
+
+        mask4 = above_bound & is_uptrend
+        explanations[mask4] = "Return value is above anomaly threshold during an uptrend."
+
         anomalies_num = anomalies_flag.sum()
         print(f"[SUCCESS] Detected {anomalies_num} {self.method} contextual anomalies")
 
-        return anomalies_flag.fillna(False).values
+        return anomalies_flag.fillna(False).values, explanations.values

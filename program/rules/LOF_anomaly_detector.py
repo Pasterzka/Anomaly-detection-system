@@ -70,7 +70,7 @@ class LOFColectiveAbomalyDetector:
         return anomalies_flag.values,lof_scores.values
 
 class LOFContextualAnomalyDetector:
-    def __init__(self, neighbours=14, contamination=0.01, penalty_factor=1.5, reward_factor=0.5):
+    def __init__(self, neighbours=14, contamination=0.01, penalty_factor=1.2, reward_factor=0.8):
         self.neighbours = neighbours
         self.contamination = contamination
         self.penalty = penalty_factor
