@@ -56,7 +56,7 @@ def main():
     lof_point_anomalies, lof_point_xai, lof_point_anomaly_score = lof_point_detector.detect(data_frame[target_feature])
 
     dbscan_point_detector = DBSCANPointAnomalyDetector(eps=EPS, min_sample=SAMPLE)
-    dbscan_point_anomalies = dbscan_point_detector.detect(data_frame[target_feature])
+    dbscan_point_anomalies, dbscan_point_xai = dbscan_point_detector.detect(data_frame[target_feature])
 
     # Collectiv anomalies
     iqr_collective_detector = newCollectiveAnomalyDetector(method='iqr', multiplier=1.5, window_size=7)
@@ -69,7 +69,7 @@ def main():
     lof_collective_anomalies, lof_collective_xai,lof_collective_anomaly_score = lof_collective_detector.detect(data_frame[target_feature])
 
     dbscan_collective_detector = DBSCANCollectiveAnomalyDetector(window_size=7, eps=EPS, min_sample=SAMPLE)
-    dbscan_collective_anomalies = dbscan_collective_detector.detect(data_frame[target_feature])
+    dbscan_collective_anomalies, dbscan_collective_xai = dbscan_collective_detector.detect(data_frame[target_feature])
 
     # Contextual anomalies
     iqr_contextual_detector = newContextualAnomalyDetector(method='iqr', multiplier=1.5, window_size=7)
@@ -82,7 +82,7 @@ def main():
     lof_contextual_anomalies, lof_contextual_xai, lof_contextual_anomaly_score = lof_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
 
     dbscan_contextual_detector = DBSCANContextualAnomalyDetector(eps=EPS, min_sample=SAMPLE)
-    dbscan_contextual_anomalies = dbscan_contextual_detector.detect(data_frame['close'], data_frame['SMA50'], return_series=data_frame['Return'])
+    dbscan_contextual_anomalies, dbscan_contextual_xai = dbscan_contextual_detector.detect(data_frame['close'], data_frame['SMA50'], return_series=data_frame['Return'])
 
 
     PLOT_DAYS = 100
@@ -234,8 +234,11 @@ def main():
     existing_df['XAI_LOF_Contextual'] = lof_contextual_xai[-PLOT_DAYS:]
 
     existing_df['DBSCAN_Point'] = dbscan_point_anomalies[-PLOT_DAYS:].astype(int)
+    existing_df['XAI_DBSCAN_Point'] = dbscan_point_xai[-PLOT_DAYS:]
     existing_df['DBSCAN_Collective'] = dbscan_collective_anomalies[-PLOT_DAYS:].astype(int)
+    existing_df['XAI_DBSCAN_Collective'] = dbscan_collective_xai[-PLOT_DAYS:]
     existing_df['DBSCAN_Contextual'] = dbscan_contextual_anomalies[-PLOT_DAYS:].astype(int)
+    existing_df['XAI_DBSCAN_Contextual'] = dbscan_contextual_xai[-PLOT_DAYS:]
     
     for col in existing_df.columns:
         if any(keyword in col for keyword in ['Point', 'Collective', 'Contextual', 'Manual_Is_Anomaly']) and not col.startswith('XAI_'):
