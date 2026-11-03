@@ -6,7 +6,7 @@ from rules.new_collective_anomaly_detector import newCollectiveAnomalyDetector
 from rules.new_contextual_anomaly_detector import newContextualAnomalyDetector
 from rules.LOF_anomaly_detector import LOFPointAnomalyDetector, LOFColectiveAbomalyDetector, LOFContextualAnomalyDetector
 from rules.DBSCAN_anomaly_detector import DBSCANPointAnomalyDetector, DBSCANCollectiveAnomalyDetector, DBSCANContextualAnomalyDetector
-from plot.new_polt_anomalies import new_plot_anomalies, lof_plot_anomalies
+from plot.new_polt_anomalies import new_plot_anomalies, lof_plot_anomalies, statistic_plot_anomalies
 from plot.labeling_plot import export_data_for_labeling, plot_for_manual_labeling
 import pandas as pd
 
@@ -47,10 +47,10 @@ def main():
 
     # Point anomalies
     iqr_point_detector = newPointAnomalyDetector(method='iqr', multiplier=1.5, window_size=7)
-    iqr_point_anomalies, iqr_point_xai = iqr_point_detector.detect(data_frame['Return'])
+    iqr_point_anomalies, iqr_point_xai, iqr_upper_bound_point, iqr_lower_bound_point = iqr_point_detector.detect(data_frame['Return'])
 
     sigma_point_detector = newPointAnomalyDetector(method='3sigma', multiplier=2.0, window_size=WINDOW_SIZE)
-    sigma_point_anomalies, sigma_point_xai = sigma_point_detector.detect(data_frame['Return'])
+    sigma_point_anomalies, sigma_point_xai, sigma_upper_bound_point, sigma_lower_bound_point  = sigma_point_detector.detect(data_frame['Return'])
 
     lof_point_detector = LOFPointAnomalyDetector(neighbours=NEIGBOURS, contamination=CONTAMINATION)
     lof_point_anomalies, lof_point_anomaly_score = lof_point_detector.detect(data_frame[target_feature])
@@ -60,10 +60,10 @@ def main():
 
     # Collectiv anomalies
     iqr_collective_detector = newCollectiveAnomalyDetector(method='iqr', multiplier=1.5, window_size=7)
-    iqr_collective_anomalies, iqr_collective_xai = iqr_collective_detector.detect(data_frame['Return'])
+    iqr_collective_anomalies, iqr_collective_xai, iqr_upper_bound_collective, iqr_lower_bound_collective = iqr_collective_detector.detect(data_frame['Return'])
 
     sigma_collective_detector = newCollectiveAnomalyDetector(method='3sigma', multiplier=2.0, window_size=7)
-    sigma_collective_anomalies, sigma_collective_xai = sigma_collective_detector.detect(data_frame['Return'])
+    sigma_collective_anomalies, sigma_collective_xai, sigma_upper_bound_collective, sigma_lower_bound_collective = sigma_collective_detector.detect(data_frame['Return'])
 
     lof_collective_detector = LOFColectiveAbomalyDetector(window_size=7, neighbours=NEIGBOURS, contamination=CONTAMINATION)
     lof_collective_anomalies, lof_collective_anomaly_score = lof_collective_detector.detect(data_frame[target_feature])
@@ -73,10 +73,10 @@ def main():
 
     # Contextual anomalies
     iqr_contextual_detector = newContextualAnomalyDetector(method='iqr', multiplier=1.5, window_size=7)
-    iqr_contextual_anomalies, iqr_contextual_xai = iqr_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
+    iqr_contextual_anomalies, iqr_contextual_xai, iqr_upper_bound_contextual, iqr_lower_bound_contextual = iqr_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
 
     sigma_contextual_detector = newContextualAnomalyDetector(method='3sigma', multiplier=2.0, window_size=7)
-    sigma_contextual_anomalies, sigma_contextual_xai = sigma_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
+    sigma_contextual_anomalies, sigma_contextual_xai, sigma_upper_bound_contextual, sigma_lower_bound_contextual = sigma_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
     
     lof_contextual_detector = LOFContextualAnomalyDetector(neighbours=NEIGBOURS, contamination=CONTAMINATION)
     lof_contextual_anomalies, lof_contextual_anomaly_score = lof_contextual_detector.detect(series=data_frame['close'], context_series=data_frame['SMA50'], return_series=data_frame['Return'])
@@ -97,6 +97,18 @@ def main():
     #     stock_name=STOCK, 
     #     title="Point Anomalies"
     # )
+
+    print("[INFO] Plotting 3sigma Point Anomalies...")
+    statistic_plot_anomalies(
+        df=data_frame[-PLOT_DAYS:], 
+        anomalies_array=sigma_point_anomalies[-PLOT_DAYS:], 
+        target_feature='close', 
+        stock_name=STOCK, 
+        title="Z-Score Point Anomalies",
+        lower_bound=sigma_lower_bound_point[-PLOT_DAYS:],  
+        upper_bound=sigma_upper_bound_point[-PLOT_DAYS:], 
+        metric_feature='Return' 
+    )
 
     # print("[INFO] Plotting 3sigma Point Anomalies...")
     # new_plot_anomalies(
@@ -163,42 +175,42 @@ def main():
     #     title="DBSCAN Collective Anomalies"
     # )
 
-    print("[INFO] Plotting IQR Contextual Anomalies...")
-    new_plot_anomalies(
-        df=data_frame[-PLOT_DAYS:], 
-        anomalies_array=iqr_contextual_anomalies[-PLOT_DAYS:], 
-        target_feature='close', 
-        stock_name=STOCK, 
-        title="Contextual Anomalies"
-    )
+    # print("[INFO] Plotting IQR Contextual Anomalies...")
+    # new_plot_anomalies(
+    #     df=data_frame[-PLOT_DAYS:], 
+    #     anomalies_array=iqr_contextual_anomalies[-PLOT_DAYS:], 
+    #     target_feature='close', 
+    #     stock_name=STOCK, 
+    #     title="Contextual Anomalies"
+    # )
 
-    print("[INFO] Plotting 3sigma Contextual Anomalies...")
-    new_plot_anomalies(
-        df=data_frame[-PLOT_DAYS:], 
-        anomalies_array=sigma_contextual_anomalies[-PLOT_DAYS:], 
-        target_feature='close', 
-        stock_name=STOCK, 
-        title="Contextual Anomalies"
-    )
+    # print("[INFO] Plotting 3sigma Contextual Anomalies...")
+    # new_plot_anomalies(
+    #     df=data_frame[-PLOT_DAYS:], 
+    #     anomalies_array=sigma_contextual_anomalies[-PLOT_DAYS:], 
+    #     target_feature='close', 
+    #     stock_name=STOCK, 
+    #     title="Contextual Anomalies"
+    # )
 
-    print("[INFO] Plotting LOF Contextual Anomalies...")
-    lof_plot_anomalies(
-        df=data_frame[-PLOT_DAYS:], 
-        anomalies_array=lof_contextual_anomalies[-PLOT_DAYS:], 
-        lof_scores=lof_contextual_anomaly_score[-PLOT_DAYS:], 
-        target_feature='close', 
-        stock_name=STOCK, 
-        title="LOF Contextual Anomalies"
-    )
+    # print("[INFO] Plotting LOF Contextual Anomalies...")
+    # lof_plot_anomalies(
+    #     df=data_frame[-PLOT_DAYS:], 
+    #     anomalies_array=lof_contextual_anomalies[-PLOT_DAYS:], 
+    #     lof_scores=lof_contextual_anomaly_score[-PLOT_DAYS:], 
+    #     target_feature='close', 
+    #     stock_name=STOCK, 
+    #     title="LOF Contextual Anomalies"
+    # )
 
-    print("[INFO] Plotting DBSCAN Contextual Anomalies...")
-    new_plot_anomalies(
-        df=data_frame[-PLOT_DAYS:], 
-        anomalies_array=dbscan_contextual_anomalies[-PLOT_DAYS:], 
-        target_feature='close', 
-        stock_name=STOCK, 
-        title="DBSCAN Contextual Anomalies"
-    )
+    # print("[INFO] Plotting DBSCAN Contextual Anomalies...")
+    # new_plot_anomalies(
+    #     df=data_frame[-PLOT_DAYS:], 
+    #     anomalies_array=dbscan_contextual_anomalies[-PLOT_DAYS:], 
+    #     target_feature='close', 
+    #     stock_name=STOCK, 
+    #     title="DBSCAN Contextual Anomalies"
+    # )
 
     existing_df['ZScore_Point'] = sigma_point_anomalies[-PLOT_DAYS:].astype(int)
     existing_df['XAI_ZScore_Point'] = sigma_point_xai[-PLOT_DAYS:]

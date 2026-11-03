@@ -36,4 +36,4 @@ class newPointAnomalyDetector:
         anomalies_num = anomalies_flag.sum()
         print(f"[SUCCESS] Detected {anomalies_num} {self.method} point anomalies")
 
-        return anomalies_flag.fillna(False).values, explanations.values
+        return anomalies_flag.fillna(False).values, explanations.values, upper_bound, lower_bound

@@ -52,3 +52,39 @@ def lof_plot_anomalies(df, anomalies_array, lof_scores, target_feature, stock_na
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
+def statistic_plot_anomalies(df, anomalies_array, target_feature, stock_name, title, lower_bound, upper_bound, metric_feature='Return'):
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8), sharex=True)
+
+    # Upper diagram
+    ax1.plot(df.index, df[target_feature], label=f'Price of {stock_name}', color='royalblue', linewidth=1.5, alpha=0.8)
+    
+    anomalous_dates = df.index[anomalies_array]
+    anomalous_prices = df[target_feature][anomalies_array]
+
+    ax1.scatter(anomalous_dates, anomalous_prices, color='red', label='Anomaly', zorder=5, s=60)
+    
+    ax1.set_title(f"{title}\n{stock_name}", fontsize=14)
+    ax1.set_ylabel("Price", fontsize=12)
+    ax1.legend(loc='upper left')
+    ax1.grid(True, linestyle='--', alpha=0.5)
+
+    # Lower diagram
+    ax2.plot(df.index, df[metric_feature], label=f'{metric_feature}', color='darkorange', linewidth=1.5)
+
+    ax2.plot(df.index, upper_bound, color='crimson', linestyle='--', linewidth=1.2, label='Upper Bound', zorder=3)
+    ax2.plot(df.index, lower_bound, color='crimson', linestyle='--', linewidth=1.2, label='Lower Bound', zorder=3)
+
+    ax2.fill_between(df.index, lower_bound, upper_bound, color='gray', alpha=0.15, label='Normal Range')
+
+    anomalous_metrics = df[metric_feature][anomalies_array]
+    ax2.scatter(anomalous_dates, anomalous_metrics, color='red', zorder=5, s=40, label='Detected Anomaly')
+
+    ax2.set_xlabel("Dates", fontsize=12)
+    ax2.set_ylabel(metric_feature, fontsize=12)
+    ax2.legend(loc='lower left')
+    ax2.grid(True, linestyle='--', alpha=0.5)
+
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()

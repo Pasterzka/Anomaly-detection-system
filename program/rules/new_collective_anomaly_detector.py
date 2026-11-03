@@ -60,5 +60,5 @@ class newCollectiveAnomalyDetector:
         anomalies_num = anomalies_windows.sum()
         print(f"[SUCCESS] Detected {anomalies_num} {self.method} collective anomalies")
 
-        return anomalies_flag.fillna(False).values, explanations.values
+        return anomalies_flag.fillna(False).values, explanations.values, upper_bound, lower_bound
 
