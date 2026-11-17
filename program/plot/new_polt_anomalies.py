@@ -88,3 +88,35 @@ def statistic_plot_anomalies(df, anomalies_array, target_feature, stock_name, ti
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
+def dbscan_plot_anomalies(df, anomalies_array, k_distances, eps, target_feature, stock_name, title):
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8), sharex=True)
+
+    # Upper diagram
+    ax1.plot(df.index, df[target_feature], label=f'Price of {stock_name}', color='royalblue', linewidth=1.5, alpha=0.8)
+
+    anomalous_dates = df.index[anomalies_array]
+    anomalous_prices = df[target_feature][anomalies_array]
+
+    ax1.scatter(anomalous_dates, anomalous_prices, color='red', label='Anomaly (Noise)', zorder=5, s=60)
+
+    ax1.set_title(f"{title}\n{stock_name}", fontsize=14)
+    ax1.set_ylabel("Price", fontsize=12)
+    ax1.legend(loc='upper left')
+    ax1.grid(True, linestyle='--', alpha=0.5)
+
+    # Lower diagram
+    ax2.plot(df.index, k_distances, label='Distance to k-th Neighbor', color='darkorange', linewidth=1.5)
+    ax2.axhline(eps, color='crimson', linestyle='--', linewidth=1.3, label=f'EPS Threshold ({eps})')
+    ax2.fill_between(df.index, 0, eps, color='green', alpha=0.1, label='Core Point Zone (Dense)')
+
+    ax2.scatter(anomalous_dates, k_distances[anomalies_array], color='red', zorder=5, s=40, label='Detected Anomaly')
+
+    ax2.set_xlabel("Dates", fontsize=12)
+    ax2.set_ylabel("k-Neighbor Distance", fontsize=12)
+    ax2.legend(loc='upper left')
+    ax2.grid(True, linestyle='--', alpha=0.5)
+
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()

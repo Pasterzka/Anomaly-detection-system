@@ -20,6 +20,13 @@ class DBSCANPointAnomalyDetector:
         dbscan = DBSCAN(eps=self.eps, min_samples=self.min_sample)
         y_pred = dbscan.fit_predict(X_scaled)
 
+        # Calculate k-distance for visualization
+        nn = NearestNeighbors(n_neighbors=self.min_sample)
+        nn.fit(X_scaled)
+        distances, _ = nn.kneighbors(X_scaled)
+
+        k_distances = pd.Series(np.nan, index=series.index)
+        k_distances.loc[series.dropna().index] = distances[:, -1]
 
         anomalies_flag = pd.Series(False, index=series.index)
         anomalies_flag.loc[series.dropna().index] = (y_pred == -1)
@@ -34,7 +41,7 @@ class DBSCANPointAnomalyDetector:
         anomalies_num = anomalies_flag.sum()
         print(f"[SUCCESS] Detected {anomalies_num} DBSCAN point anomalies")
 
-        return anomalies_flag.values, explanations.values
+        return anomalies_flag.values, explanations.values, k_distances.values
 
 class DBSCANCollectiveAnomalyDetector:
     def __init__(self, window_size=14, eps=5, min_sample=5):
@@ -56,6 +63,14 @@ class DBSCANCollectiveAnomalyDetector:
         dbscan = DBSCAN(eps=self.eps, min_samples=self.min_sample)
         y_pred = dbscan.fit_predict(X_scaled)
 
+        # Calculate k-distance for visualization
+        nn = NearestNeighbors(n_neighbors=self.min_sample)
+        nn.fit(X_scaled)
+        distances, _ = nn.kneighbors(X_scaled)
+
+        k_distances = pd.Series(np.nan, index=series.index)
+        k_distances.loc[series_rolling.dropna().index] = distances[:, -1]
+
         anomalies_flags = pd.Series(False, index=series.index)
         anomalies_flags.loc[series_rolling.dropna().index] = (y_pred == -1)
 
@@ -75,7 +90,7 @@ class DBSCANCollectiveAnomalyDetector:
         anomalies_num = anomalies_flags.sum()
         print(f"[SUCCESS] Detected {anomalies_num} DBSCAN colective anomalies")
 
-        return anomalies_flag.values, explanations.values
+        return anomalies_flag.values, explanations.values, k_distances.values
 
 class DBSCANContextualAnomalyDetector:
     def __init__(self, eps=0.5, min_sample=5, penalty_factor=1.2, reward_factor=0.8):
@@ -110,7 +125,14 @@ class DBSCANContextualAnomalyDetector:
         # Inicjalization
         dbscan = DBSCAN(eps=self.eps, min_samples=self.min_sample)
         y_pred = dbscan.fit_predict(X)
-    
+
+        # Create k-nn module and calculate k-distance for visualization
+        nn = NearestNeighbors(n_neighbors=self.min_sample)
+        nn.fit(X)
+        distances, _ = nn.kneighbors(X)
+
+        k_distances = pd.Series(np.nan, index=return_series.index)
+        k_distances.loc[context.dropna().index] = distances[:, -1]
     
         anomalies_flag = pd.Series(False, index=return_series.index)
         anomalies_flag.loc[context.dropna().index] = (y_pred == -1)
@@ -145,5 +167,5 @@ class DBSCANContextualAnomalyDetector:
                 top_feature_name = context.columns[top_feature_idx]
                 explanations.loc[idx] = f"Key anomaly driver: {top_feature_name}. (DBSCAN Noise Point)"
     
-        return anomalies_flag.values, explanations.values
+        return anomalies_flag.values, explanations.values, k_distances.values
 
