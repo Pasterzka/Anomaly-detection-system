@@ -1,0 +1,59 @@
+Sposoby detekcji anomalii:
+
+Niedoświadczony analityk (ja):
+- Bierze pod uwagę 
+    - Cena akcji
+    - Trend
+    - Stopa zwrotu
+    - Swego rodzaju okno czasowe
+- Analizuje szereg czasowy i oceniam miejsca, w których według mnie następuje anomalia
+
+Z-score:
+- W anomaliach Punktowych i grupowych bierze pod uwagę:
+    - Stopę zwrotu
+    - Okno czasowe
+- W anomaliach kontekstowych bierze pod uwagę dodatkowo:
+    - Trend
+- Detekcja polega na ocenie czy stopa zwrotu przekroczyła granice anomalii
+
+IQR:
+- W anomaliach Punktowych i grupowych bierze pod uwagę:
+    - Stopę zwrotu
+    - Okno czasowe
+- W anomaliach kontekstowych bierze pod uwagę dodatków
+    - Trend
+- Detekcja polega na ocenie czy stopa zwrotu przekroczyła granice anomalii
+- 
+
+LOF (Local Outlier Factor):
+- W anomaliach Punktowych i grupowych bierze pod uwagę:
+    - Stopę zwrotu
+    - Gęstość lokalnego sąsiedztwa 
+- W anomaliach kontekstowych bierze pod uwagę dodatkowo:
+    - Trend
+    - Odchylenie
+- Detekcja polega na porównaniu gęstości wokół punktu z gęstością jego sąsiadów i ocenie, czy punkt jest odizolowany
+
+
+DBSCAN:
+- W anomaliach Punktowych i grupowych bierze pod uwagę:
+    - Stopę zwrotu
+    - Odległość do innych punktów
+    - Okno czasowe
+- W anomaliach kontekstowych bierze pod uwagę dodatkowo:
+    - Trend
+    - Odchylenie
+- Detekcja polega na grupowaniu danych na podstawie gęstości i ocenie, czy dana znajduje się w jakimś klastrze danych
+
+
+Doświadczony Analityk - Ekspert (Pan):
+- Bierze pod uwagę 
+    - Cena akcji
+    - Trend
+    - Stopa zwrotu
+    - Swego rodzaju okno czasowe
+- Analizuje szereg czasowy i oceniam miejsca, w których według mnie następuje anomalia
+
+Docelowo chciałem, żeby Ekspert oceniał dokładnie Anomalie, żeby mieć tak ogólne Grand True, ale rzeczywiście skoro algorytmy opierają się na jakimś sposobie to Ekspert również musi.
+
+
