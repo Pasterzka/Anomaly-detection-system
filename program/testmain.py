@@ -6,9 +6,6 @@ from plot.new_polt_anomalies import dbscan_plot_anomalies
 
 
 def main():
-    # =========================================================================
-    # 1. KONFIGURACJA DANYCH I PARAMETRÓW DBSCAN POINT
-    # =========================================================================
     STOCK = "INTC"
     START_RANGE = "-200d"
     INDICATOR_WINDOW = 14
@@ -17,9 +14,7 @@ def main():
     EPS = 0.4
     MIN_SAMPLE = 14
 
-    # =========================================================================
-    # 2. POBIERANIE I PRZETWARZANIE DANYCH
-    # =========================================================================
+    # Data import and process
     db_manager = InfluxDBManager()
     data_frame = db_manager.newFeatchStockData(STOCK, start_range=START_RANGE)
 
@@ -30,15 +25,11 @@ def main():
     data_frame = indicators.apply_all(data_frame)
     data_frame.dropna(inplace=True)
 
-    # =========================================================================
-    # 3. DETEKCJA ANOMALII PUNKTOWYCH (DBSCAN)
-    # =========================================================================
+    # Detect
     detector = DBSCANPointAnomalyDetector(eps=EPS, min_sample=MIN_SAMPLE)
     anomalies, explanations, k_distances = detector.detect(data_frame["Return"])
 
-    # =========================================================================
-    # 4. PODSUMOWANIE I WIZUALIZACJA
-    # =========================================================================
+    # Vizualization
     df_plot = data_frame.tail(PLOT_DAYS)
     anomalies_plot = anomalies[-PLOT_DAYS:]
     k_dist_plot = k_distances[-PLOT_DAYS:]
