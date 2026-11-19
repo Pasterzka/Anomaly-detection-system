@@ -6,6 +6,7 @@ from plot.new_polt_anomalies import dbscan_plot_anomalies
 
 
 def main():
+    # Parameters
     STOCK = "INTC"
     START_RANGE = "-200d"
     INDICATOR_WINDOW = 14
