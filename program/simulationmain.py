@@ -4,7 +4,7 @@ from influxDB.database_manager import InfluxDBManager
 from preprocessing.new_data_preprocesing import newDataPreprocessor
 from preprocessing.technical_indicators import TechnicalIndicators
 from rules.new_point_anomaly_detector import newPointAnomalyDetector
-from simulation.simulation import TradingSimulation1
+from simulation.simulation import TradingSimulation1, TradingSimulation2
 
 
 def plot_simulation_results(df, simulation_results, stock_name, anomalies_flag=None, ref_fraction="50%"):
@@ -106,7 +106,7 @@ def main():
     anomalies_sim = anomalies_flag[-PLOT_DAYS:]
 
     # Run portfolio trading simulation
-    simulator = TradingSimulation1(init_cash=10000, init_shares=100)
+    simulator = TradingSimulation2(init_cash=10000, init_shares=100)
     simulation_results = simulator.run(df_sim, anomalies_sim)
 
     # Print simulation summary
